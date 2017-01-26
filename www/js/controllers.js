@@ -58,8 +58,8 @@ angular.module('stock.controllers', [])
   ];
 }])
 
-.controller('StockCtrl',['$scope','$stateParams','$window','stockDataService','dateService','chartDataService',
- function($scope, $stateParams,$window,stockDataService,dateService,chartDataService) {
+.controller('StockCtrl',['$scope','$stateParams','$ionicPopup','$window','stockDataService','dateService','chartDataService',
+ function($scope, $stateParams,$ionicPopup,$window,stockDataService,dateService,chartDataService) {
   $scope.ticker=$stateParams.stockTicker;
   $scope.oneYearAgoDate = dateService.oneYearAgoDate();
   $scope.todayDate = dateService.currentDate();
@@ -73,6 +73,29 @@ angular.module('stock.controllers', [])
   $scope.chartViewFunction = function (n) {
     $scope.chartView=n;
   };
+  $scope.addnote = function() {
+  $scope.note = {title: 'Note', body:'', date:$scope.todayDate, ticker:$scope.ticker};
+
+  // An elaborate, custom popup
+  var note = $ionicPopup.show({
+    template: '<input type="text" ng-model="note.title" id="stock-note-title"><textarea type="text" ng-model="note.body" id="stock-note-body"></textarea>',
+    title: 'New Note' + $scope.ticker,
+    scope: $scope,
+    buttons: [
+      { text: 'Cancel' },
+      {
+        text: '<b>Save</b>',
+        type: 'button-balanced',
+        onTap: function(e) {
+          console.log("save", $scope.note);
+        }
+      }
+    ]
+  });
+  note.then(function(res) {
+    console.log('Tapped!', res);
+  });
+};
   function getChartData() {
     var promise = chartDataService.gethistoricalData($scope.ticker,$scope.oneYearAgoDate,$scope.todayDate);
     promise.then(function(data){
@@ -103,9 +126,9 @@ angular.module('stock.controllers', [])
                 type: 'linePlusBarChart',
                 margin: {
                     top: 15,
-                    right: 40,
+                    right: 0,
                     bottom: marginBottom,
-                    left: 70
+                    left: 0
                 },
                 bars: {
                     forceY: [0]
@@ -125,9 +148,9 @@ angular.module('stock.controllers', [])
                         return null;
                     }
                 },
-                tooltips:false,
-                showlegend:false,
-                useVoronoi:false,
+                // tooltips:false,
+                // showlegend:false,
+                // useVoronoi:false,
                 x2Axis: {
                     tickFormat: function(d) {
                         var dx = $scope.data[0].values[d] && $scope.data[0].values[d].x || 0;
@@ -136,7 +159,7 @@ angular.module('stock.controllers', [])
                     showMaxMin: false
                 },
                 y1Axis: {
-                    axisLabel: 'Y1 Axis',
+                    axisLabel: 'Price',
                     tickFormat: function(d){
                         return d3.format(',f')(d);
                     },
@@ -149,6 +172,7 @@ angular.module('stock.controllers', [])
                     }
                 },
                 y3Axis: {
+                  axisLabel: 'Volume',
                     tickFormat: function(d){
                         return d3.format(',.2s')(d);
                     }

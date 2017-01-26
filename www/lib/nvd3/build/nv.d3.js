@@ -36,9 +36,7 @@ if (!Function.prototype.bind) {
             fToBind = this,
             fNOP = function () {},
             fBound = function () {
-                return fToBind.apply(this instanceof fNOP && oThis
-                        ? this
-                        : oThis,
+                return fToBind.apply(this instanceof fNOP && oThis ? this: oThis,
                     aArgs.concat(Array.prototype.slice.call(arguments)));
             };
 
@@ -190,15 +188,15 @@ nv.dom.read = function(callback) {
 nv.interactiveGuideline = function() {
     "use strict";
 
-    var margin = { left: 0, top: 0 } //Pass the chart's top and left magins. Used to calculate the mouseX/Y.
-        ,   width = null
-        ,   height = null
-        ,   xScale = d3.scale.linear()
-        ,   dispatch = d3.dispatch('elementMousemove', 'elementMouseout', 'elementClick', 'elementDblclick', 'elementMouseDown', 'elementMouseUp')
-        ,   showGuideLine = true
-        ,   svgContainer = null // Must pass the chart's svg, we'll use its mousemove event.
-        ,   tooltip = nv.models.tooltip()
-        ,   isMSIE =  window.ActiveXObject// Checkt if IE by looking for activeX. (excludes IE11)
+    var margin = { left: 0, top: 0 }, //Pass the chart's top and left magins. Used to calculate the mouseX/Y.
+        width = null,
+        height = null,
+        xScale = d3.scale.linear(),
+        dispatch = d3.dispatch('elementMousemove', 'elementMouseout', 'elementClick', 'elementDblclick', 'elementMouseDown', 'elementMouseUp'),
+        showGuideLine = true,
+        svgContainer = null, // Must pass the chart's svg, we'll use its mousemove event.
+        tooltip = nv.models.tooltip(),
+        isMSIE =  window.ActiveXObject// Checkt if IE by looking for activeX. (excludes IE11)
     ;
 
     tooltip
@@ -1709,7 +1707,7 @@ nv.models.axis = function() {
                     var rotateLabelsRule = '';
                     if (rotateLabels%360) {
                         //Reset transform on ticks so textHeight can be calculated correctly
-                        xTicks.attr('transform', ''); 
+                        xTicks.attr('transform', '');
                         //Calculate the longest xTick width
                         xTicks.each(function(d,i){
                             var box = this.getBoundingClientRect();
@@ -1917,9 +1915,9 @@ nv.models.axis = function() {
                     and the arithmetic trick below solves that.
                     */
                     return !parseFloat(Math.round(d * 100000) / 1000000) && (d !== undefined)
-                }) 
+                })
                 .classed('zero', true);
-            
+
             //store old scales for use in transitions on update
             scale0 = scale.copy();
 
@@ -4688,7 +4686,7 @@ nv.models.focus = function(content) {
             var availableWidth = nv.utils.availableWidth(width, container, margin),
                 availableHeight = height - margin.top - margin.bottom;
 
-            chart.update = function() { 
+            chart.update = function() {
                 if( duration === 0 ) {
                     container.call( chart );
                 } else {
@@ -4723,7 +4721,7 @@ nv.models.focus = function(content) {
             g.select('.nv-background rect')
                 .attr('width', availableWidth)
                 .attr('height', availableHeight);
-                
+
             content
                 .width(availableWidth)
                 .height(availableHeight)
@@ -4735,7 +4733,7 @@ nv.models.focus = function(content) {
                 .datum(data.filter(function(d) { return !d.disabled; }));
 
             d3.transition(contentWrap).call(content);
-            
+
             // Setup Brush
             brush
                 .x(x)
@@ -4753,7 +4751,7 @@ nv.models.focus = function(content) {
 
             var brushBG = g.select('.nv-brushBackground').selectAll('g')
                 .data([brushExtent || brush.extent()]);
-    
+
             var brushBGenter = brushBG.enter()
                 .append('g');
 
@@ -4785,7 +4783,7 @@ nv.models.focus = function(content) {
                 xAxis.scale(x)
                     ._ticks( nv.utils.calcTicksX(availableWidth/100, data) )
                     .tickSize(-availableHeight, 0);
-  
+
                 g.select('.nv-x.nv-axis')
                     .attr('transform', 'translate(0,' + y.range()[0] + ')');
                 d3.transition(g.select('.nv-x.nv-axis'))
@@ -4801,7 +4799,7 @@ nv.models.focus = function(content) {
                 d3.transition(g.select('.nv-y.nv-axis'))
                     .call(yAxis);
             }
-            
+
             g.select('.nv-x.nv-axis')
                 .attr('transform', 'translate(0,' + y.range()[0] + ')');
 
@@ -4812,7 +4810,7 @@ nv.models.focus = function(content) {
             //============================================================
             // Functions
             //------------------------------------------------------------
-    
+
             // Taken from crossfilter (http://square.github.com/crossfilter/)
             function resizePath(d) {
                 var e = +(d == 'e'),
@@ -4828,8 +4826,8 @@ nv.models.focus = function(content) {
                     + 'M' + (4.5 * x) + ',' + (y + 8)
                     + 'V' + (2 * y - 8);
             }
-    
-    
+
+
             function updateBrushBG() {
                 if (!brush.empty()) brush.extent(brushExtent);
                 brushBG
@@ -4839,7 +4837,7 @@ nv.models.focus = function(content) {
                             rightWidth = availableWidth - x(d[1]);
                         d3.select(this).select('.left')
                             .attr('width',  leftWidth < 0 ? 0 : leftWidth);
-    
+
                         d3.select(this).select('.right')
                             .attr('x', x(d[1]))
                             .attr('width', rightWidth < 0 ? 0 : rightWidth);
@@ -10521,10 +10519,10 @@ nv.models.parallelCoordinates = function() {
             if (active.length === 0) {
                 active = data;
             }; //set all active before first brush call
-            
+
             dimensionNames = dimensionData.sort(function (a, b) { return a.currentPosition - b.currentPosition; }).map(function (d) { return d.key });
             enabledDimensions = dimensionData.filter(function (d) { return !d.disabled; });
-            
+
             // Setup Scales
             x.rangePoints([0, availableWidth], 1).domain(enabledDimensions.map(function (d) { return d.key; }));
 
@@ -10533,7 +10531,7 @@ nv.models.parallelCoordinates = function() {
             var oldDomainMaxValue = {};
             var displayMissingValuesline = false;
             var currentTicks = [];
-            
+
             dimensionNames.forEach(function(d) {
                 var extent = d3.extent(dataValues, function (p) { return +p[d]; });
                 var min = extent[0];
@@ -10611,7 +10609,7 @@ nv.models.parallelCoordinates = function() {
                         .attr("y1", function(d) { return d[1]; })
                         .attr("x2", function(d) { return d[2]; })
                         .attr("y2", function(d) { return d[3]; });
-    
+
                 //Add the text "undefined values" under the missing value line
                 missingValueslineText = wrap.select('.missingValuesline').selectAll('text').data([undefinedValuesLabel]);
                 missingValueslineText.append('text').data([undefinedValuesLabel]);
@@ -10677,7 +10675,7 @@ nv.models.parallelCoordinates = function() {
                 .on("mouseover", function(d, i) {
                     dispatch.elementMouseover({
                         label: d.tooltip || d.key,
-                        color: d.color 
+                        color: d.color
                     });
                 })
                 .on("mouseout", function(d, i) {
@@ -10768,7 +10766,7 @@ nv.models.parallelCoordinates = function() {
                     if (visible)
                         y[f.dimension].brush.extent(f.extent);
                 });
-                
+
                 dimensions.select('.nv-brushBackground')
                     .each(function (d) {
                         d3.select(this).call(y[d.key].brush);
@@ -10777,10 +10775,10 @@ nv.models.parallelCoordinates = function() {
                     .selectAll('rect')
                     .attr('x', -8)
                     .attr('width', 16);
-                
+
                 updateTicks();
             }
-            
+
             // Handles a brush event, toggling the display of foreground lines.
             function brushstart() {
                 //If brush aren't visible, show it before brushing again.
@@ -10789,7 +10787,7 @@ nv.models.parallelCoordinates = function() {
                     restoreBrush(true);
                 }
             }
-            
+
             // Handles a brush event, toggling the display of foreground lines.
             function brush() {
                 actives = dimensionNames.filter(function (p) { return !y[p].brush.empty(); });
@@ -10814,9 +10812,9 @@ nv.models.parallelCoordinates = function() {
                     if (isActive) active.push(d);
                     return isActive ? null : 'none';
                 });
-                
+
                 updateTicks();
-                
+
                 dispatch.brush({
                     filters: filters,
                     active: active
@@ -10831,23 +10829,23 @@ nv.models.parallelCoordinates = function() {
                         f.hasOnlyNaN = true;
                 });
                 dispatch.brushEnd(active, hasActiveBrush);
-            }           
+            }
             function updateTicks() {
                 dimensions.select('.nv-axis')
                     .each(function (d, i) {
                         var f = filters.filter(function (k) { return k.dimension == d.key; });
                         currentTicks[d.key] = y[d.key].domain();
-                        
+
                         //If brush are available, display brush extent
                         if (f.length != 0 && displayBrush)
                         {
                             currentTicks[d.key] = [];
-                            if (f[0].extent[1] > y[d.key].domain()[0]) 
+                            if (f[0].extent[1] > y[d.key].domain()[0])
                                 currentTicks[d.key] = [f[0].extent[1]];
                             if (f[0].extent[0] >= y[d.key].domain()[0])
-                                currentTicks[d.key].push(f[0].extent[0]);    
+                                currentTicks[d.key].push(f[0].extent[0]);
                         }
-                            
+
                         d3.select(this).call(axis.scale(y[d.key]).tickFormat(d.format).tickValues(currentTicks[d.key]));
                 });
             }
@@ -10900,7 +10898,7 @@ nv.models.parallelCoordinates = function() {
         active: { get: function () { return active; }, set: function (_) { active = _; } },
         lineTension:   {get: function(){return lineTension;},     set: function(_){lineTension = _;}},
         undefinedValuesLabel : {get: function(){return undefinedValuesLabel;}, set: function(_){undefinedValuesLabel=_;}},
-        
+
         // deprecated options
         dimensions: {get: function () { return dimensionData.map(function (d){return d.key}); }, set: function (_) {
             // deprecated after 1.8.1
@@ -10920,7 +10918,7 @@ nv.models.parallelCoordinates = function() {
             } else {
                 _.forEach(function (k, i) { dimensionData[i].key = k })
             }
- 
+
         }},
         dimensionFormats: {get: function () { return dimensionData.map(function (d) { return d.format }); }, set: function (_) {
             // deprecated after 1.8.1
@@ -12687,7 +12685,7 @@ nv.models.scatter = function() {
                 .attr('id', 'nv-edge-clip-' + id)
                 .append('rect')
                 .attr('transform', 'translate( -10, -10)');
-                
+
             wrap.select('#nv-edge-clip-' + id + ' rect')
                 .attr('width', availableWidth + 20)
                 .attr('height', (availableHeight > 0) ? availableHeight + 20 : 0);
@@ -13563,7 +13561,7 @@ nv.models.sparkline = function() {
     //------------------------------------------------------------
 
     var renderWatch = nv.utils.renderWatch(dispatch);
-    
+
     function chart(selection) {
         renderWatch.reset();
         selection.each(function(data) {
@@ -13628,7 +13626,7 @@ nv.models.sparkline = function() {
                             getY(d, d.pointIndex) == y.domain()[0] ? 'nv-point nv-minValue' : 'nv-point nv-maxValue'
                 });
         });
-        
+
         renderWatch.renderEnd('sparkline immediate');
         return chart;
     }
@@ -13698,7 +13696,7 @@ nv.models.sparklinePlus = function() {
         , noData = null
         , dispatch = d3.dispatch('renderEnd')
         ;
-        
+
     //============================================================
     // Private Variables
     //------------------------------------------------------------
@@ -13992,13 +13990,13 @@ nv.models.stackedArea = function() {
             gEnter.append('g').attr('class', 'nv-scatterWrap');
 
             wrap.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-            
+
             // If the user has not specified forceY, make sure 0 is included in the domain
             // Otherwise, use user-specified values for forceY
             if (scatter.forceY().length == 0) {
                 scatter.forceY().push(0);
             }
-            
+
             scatter
                 .width(availableWidth)
                 .height(availableHeight)
