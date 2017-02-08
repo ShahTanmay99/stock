@@ -41,37 +41,39 @@ angular.module('stock.controllers', [])
   };
 })
 
-.controller('myStocksctrl',['$scope',
- function($scope) {
-  $scope.mystocksarray=[
-    {ticker:"BOA"},
-    {ticker:"AAPL"},
-    {ticker:"FB"},
-    {ticker:"C"},
-    {ticker:"AAP"},
-    {ticker:"TSLA"},
-    {ticker:"AAC"},
-    {ticker:"AAR"},
-    {ticker:"AAS"},
-    {ticker:"AAT"},
-    {ticker:"GPRO"}
-  ];
+.controller('myStocksctrl',['$scope','myStocksArrayService',
+ function($scope,myStocksArrayService) {
+  $scope.myStocksArray=myStocksArrayService;
+  console.log($scope.myStocksArray);
 }])
 
-.controller('StockCtrl',['$scope','$stateParams','$ionicPopup','$window','stockDataService','dateService','chartDataService',
- function($scope, $stateParams,$ionicPopup,$window,stockDataService,dateService,chartDataService) {
+.controller('StockCtrl',['$scope','$stateParams','$ionicPopup','$window','followStocksService','stockDataService','dateService','chartDataService','notesService',
+ function($scope, $stateParams,$ionicPopup,$window,followStocksService,stockDataService,dateService,chartDataService,notesService) {
   $scope.ticker=$stateParams.stockTicker;
   $scope.oneYearAgoDate = dateService.oneYearAgoDate();
   $scope.todayDate = dateService.currentDate();
-
+  $scope.stockNotes=[];
   $scope.chartView=4;
   $scope.$on("$ionicView.afterEnter", function(){
       getPrice();
       getDetails();
       getChartData();
+      $scope.stockNotes=notesService.getNotes($scope.ticker);
+      $scope.following=followStocksService.checkfollowStocks($scope.ticker);
 });
   $scope.chartViewFunction = function (n) {
     $scope.chartView=n;
+  };
+
+  $scope.follow = function($ticker) {
+    if($scope.following){
+      followStocksService.unfollowStocks($scope.ticker);
+      $scope.following= false;
+    }
+    else{
+      followStocksService.followStocks($scope.ticker);
+      $scope.following= true;
+    }
   };
   $scope.addnote = function() {
   $scope.note = {title: 'Note', body:'', date:$scope.todayDate, ticker:$scope.ticker};
@@ -88,13 +90,49 @@ angular.module('stock.controllers', [])
         type: 'button-balanced',
         onTap: function(e) {
           console.log("save", $scope.note);
+          notesService.putNotes($scope.ticker,$scope.note);
         }
       }
     ]
   });
   note.then(function(res) {
-    console.log('Tapped!', res);
+    $scope.stockNotes=notesService.getNotes($scope.ticker);
   });
+};
+
+$scope.opennote = function(index,title,body) {
+$scope.note = {title: title, body:body, date:$scope.todayDate, ticker:$scope.ticker};
+
+// An elaborate, custom popup
+var note = $ionicPopup.show({
+  template: '<input type="text" ng-model="note.title" id="stock-note-title"><textarea type="text" ng-model="note.body" id="stock-note-body"></textarea>',
+  title: $scope.note.title,
+  scope: $scope,
+  buttons: [
+    { text: 'Cancel',
+      type: 'button-small'
+    },
+    {
+      text: '<b>Save</b>',
+      type: 'button-balanced button-small',
+      onTap: function(e) {
+        console.log("save", $scope.note);
+        notesService.putNotes($scope.ticker,$scope.note);
+      }
+    },
+    {
+      text: '<b>Delete</b>',
+      type: 'button-assertive button-small',
+      onTap: function(e) {
+        console.log("Delete", $scope.note);
+        notesService.deleteNotes($scope.ticker,index);
+      }
+    }
+  ]
+});
+note.then(function(res) {
+  $scope.stockNotes=notesService.getNotes($scope.ticker);
+});
 };
   function getChartData() {
     var promise = chartDataService.gethistoricalData($scope.ticker,$scope.oneYearAgoDate,$scope.todayDate);

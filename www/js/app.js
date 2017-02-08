@@ -6,6 +6,7 @@
 // 'starter.controllers' is found in controllers.js
 angular.module('stock', [
 'ionic',
+'angular-cache',
 'nvd3',
 'nvChart',
 'stock.controllers',
@@ -13,7 +14,6 @@ angular.module('stock', [
 'stock.directives',
 'stock.services'
 ])
-
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
     // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard

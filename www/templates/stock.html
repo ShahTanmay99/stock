@@ -1,7 +1,10 @@
 <ion-view view-title={{ticker}} drag-content="false">
-  <!-- <ion-nav-bar id="stock-navbar" class="bar-dark ng-style:reactiveColor">
+  <ion-nav-bar id="stock-navbar">
    <ion-nav-back-button></ion-nav-back-button>
- </ion-nav-bar> -->
+ </ion-nav-bar>
+ <ion-nav-buttons side="right">
+  <button ng-class="following ? 'ion-ios-plus ':'ion-ios-plus-outline'" ng-click = "follow(ticker)"> </button>
+</ion-nav-buttons>
   <div class="bar bar-subheader bar-light" id="stock-subheader-bar">
     <div class="buttons" side="left">
       <div class="button button-clear display-flex">
@@ -56,9 +59,10 @@
     </div>
   </div>
   <div class="card">
-    <div class="item item-divider">Notes <span ng-click="addnote()"> Add </span></div>
-      <a class="item">
-        <h2>Note</h2>
+    <div class="item item-divider">Notes <span ng-click="addnote()" class="add-stock-note"> Add <i class="icon ion-ios-plus"></i></span></div>
+      <a class="item" ng-repeat="note in stockNotes track by $index" ng-click="opennote($index, note.title, note.body)" >
+        <h2>{{note.title}}</h2>
+        <h6>{{note.date}}</h6>
       </a>
     </div>
   <div class="card">
