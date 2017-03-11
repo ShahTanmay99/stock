@@ -8,6 +8,7 @@ angular.module('stock', [
 'ionic',
 'angular-cache',
 'nvd3',
+'cb.x2js',
 'nvChart',
 'stock.controllers',
 'stock.filter',

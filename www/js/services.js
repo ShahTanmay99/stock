@@ -156,12 +156,16 @@ return{
 .factory('stockDataService',function ($q,$http,encodeURIService, stockDetailsCacheService) {
   var getDetailsData = function(ticker) {
     var deferred = $q.defer(),
+    cached=ticker,
+    cacheddata= stockDetailsCacheService.get(cached);
    query = 'select * from yahoo.finance.quotes where symbol IN ("' + ticker + '")',
    url = 'http://query.yahooapis.com/v1/public/yql?q=' + encodeURIService.encode(query) + '&format=json&env=http://datatables.org/alltables.env';
-   var  cached=ticker,
-    cacheddata= stockDetailsCacheService.get(cached);
-    if(!stockDetailsCacheService.get('cached')){
-      $http.get(url)
+   
+    if(cacheddata){
+      deferred.resolve(cacheddata);
+    }
+    else {
+        $http.get(url)
       .success(function(json){
         console.log(json);
         jsonData= json.query.results.quote;
@@ -172,9 +176,6 @@ return{
         console.log("Details error" + error);
         deferred.reject();
       });
-    }
-    else {
-        deferred.resolve(cacheddata);
     }
 
     return deferred.promise;
@@ -201,13 +202,14 @@ return{
 })
 .factory('chartDataService', function($q,$http, encodeURIService,chartDataCacheService) {
 var gethistoricalData= function(ticker, fromDate, todayDate){
-var  cached=ticker,
-  cacheddata= chartDataCacheService.get(cached),
-  deferred = $q.defer(),
+var deferred = $q.defer(),
+ cached=ticker,
+  chartDataCache= chartDataCacheService.get(cached),
+  
       query = 'select * from yahoo.finance.historicaldata where symbol = "' + ticker + '" and startDate = "' + fromDate + '" and endDate = "' + todayDate + '"';
       url = 'http://query.yahooapis.com/v1/public/yql?q=' + encodeURIService.encode(query) + '&format=json&env=http://datatables.org/alltables.env';
-      if(cacheddata){
-        deferred.resolve(cacheddata);
+      if(chartDataCache){
+        deferred.resolve(chartDataCache);
       }
       else{
         $http.get(url)
@@ -223,14 +225,14 @@ var  cached=ticker,
             //console.log(date);
            price= parseFloat(Math.round(datadate.Close*100)/100).toFixed(3);
           //console.log(price);
-          volume = datadate.Volume;
-          var tempVolume = '[' + date + ',' + volume + ']',
+          volume = datadate.Volume,
+          tempVolume = '[' + date + ',' + volume + ']',
           tempPrice = '[' + date + ',' + price + ']';
           //console.log(tempVolume, tempPrice);
           volumeData.unshift(tempVolume);
           priceData.unshift(tempPrice);
         });
-          var finalData =
+          var finalChartData =
           '[{' +
               '"key":' + '" volume ",'+
               '"bar":' + ' true, ' +
@@ -241,8 +243,8 @@ var  cached=ticker,
                 '"values":' + '[' + priceData + ']' +
               '}]';
 
-        deferred.resolve(finalData);
-        chartDataCacheService.put(ticker,finalData);
+        deferred.resolve(finalChartData);
+        chartDataCacheService.put(cached,finalChartData);
       })
       .error(function(error){
         console.log("Chart error" + error);
@@ -262,21 +264,50 @@ return{
       return notesCacheService.get(ticker);
     },
     putNotes:function (ticker, note){
-     var stockCache=[];
+     var notesCache=[];
     if(notesCacheService.get(ticker)){
-      stockCache = notesCacheService.get(ticker);
-      stockCache.push(note);
+      notesCache = notesCacheService.get(ticker);
+      notesCache.push(note);
     }
     else{
-      stockCache.push(note);
+      notesCache.push(note);
     }
-       notesCacheService.put(ticker,stockCache);
+       notesCacheService.put(ticker,notesCache);
     },
     deleteNotes:function (ticker, index) {
-      deleteNote=[];
-      deleteNote=notesCacheService.get(ticker);
-      deleteNote.splice(index,1);
-      notesCacheService.put(ticker,deleteNote);
+      notesCache=[];
+      notesCache=notesCacheService.get(ticker);
+      notesCache.splice(index,1);
+      notesCacheService.put(ticker,notesCache);
     }
   };
-});
+})
+.factory('newsService', function($q, $http) {
+
+  return {
+
+    getNews: function(ticker) {
+
+      var deferred = $q.defer(),
+
+      x2js = new X2JS(),
+
+      url = "http://finance.yahoo.com/rss/headline?s="+ ticker;
+
+      $http.get(url)
+        .success(function(xml) {
+          var xmlDoc = x2js.parseXmlString(xml),
+          json = x2js.xml2json(xmlDoc),
+          jsonData = json.rss.channel.item;
+          deferred.resolve(jsonData);
+          console.log(jsonData);
+        })
+        .error(function(error) {
+          deferred.reject();
+          console.log("News error: " + error);
+        });
+
+      return deferred.promise;
+    }
+  };
+})

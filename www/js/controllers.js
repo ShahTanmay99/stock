@@ -47,8 +47,8 @@ angular.module('stock.controllers', [])
   console.log($scope.myStocksArray);
 }])
 
-.controller('StockCtrl',['$scope','$stateParams','$ionicPopup','$window','followStocksService','stockDataService','dateService','chartDataService','notesService',
- function($scope, $stateParams,$ionicPopup,$window,followStocksService,stockDataService,dateService,chartDataService,notesService) {
+.controller('StockCtrl',['$scope','$stateParams','$ionicPopup','$window','followStocksService','stockDataService','dateService','chartDataService','notesService','newsService',
+ function($scope, $stateParams,$ionicPopup,$window,followStocksService,stockDataService,dateService,chartDataService,notesService,newsService) {
   $scope.ticker=$stateParams.stockTicker;
   $scope.oneYearAgoDate = dateService.oneYearAgoDate();
   $scope.todayDate = dateService.currentDate();
@@ -58,12 +58,16 @@ angular.module('stock.controllers', [])
       getPrice();
       getDetails();
       getChartData();
+      getNews();
       $scope.stockNotes=notesService.getNotes($scope.ticker);
       $scope.following=followStocksService.checkfollowStocks($scope.ticker);
 });
   $scope.chartViewFunction = function (n) {
     $scope.chartView=n;
   };
+  $scope.openWindow = function(link){
+    console.log(link);
+  }
 
   $scope.follow = function($ticker) {
     if($scope.following){
@@ -148,7 +152,22 @@ note.then(function(res) {
     var promise=stockDataService.getPriceData($scope.ticker);
     promise.then(function(data){
       $scope.priceData=data;
+              if(data.chg_percent >= 0 && data !== null) {
+          $scope.reactiveColor = {'background-color': '#33cd5f'};
+        }
+        else if(data.chg_percent < 0 && data !== null) {
+          $scope.reactiveColor = {'background-color' : '#ef473a'};
+        }
       //console.log(data);
+    });
+  }
+  function getNews(){
+
+    $scope.newsStories = [];
+    var promise=newsService.getNews($scope.ticker);
+    promise.then(function(data){
+      $scope.newsStories=data;
+
     });
   }
   function getDetails(){
